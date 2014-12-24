@@ -1,6 +1,8 @@
+var Promise = require('promise');
 var mongo = require('mongoskin');
 var db = mongo.db("mongodb://localhost:27017/giftto", {native_parser: true});
 var users = db.collection('users');
+users.findOne = Promise.denodeify(users.findOne);
 
 function User(data) {
     this.data = data;
