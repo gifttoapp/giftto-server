@@ -1,15 +1,14 @@
 var randtoken = require('rand-token');
-var Promise = require('promise');
 var mongo = require('mongoskin');
 var db = mongo.db("mongodb://localhost:27017/giftto", {native_parser: true});
-var logins = Promise.denodeify(db.collection('logins'));
-logins.findOne = Promise.denodeify(db.collection('logins').findOne);
+var logins = db.collection('logins');
 
 var User = require('./user');
 function Login(data) {
-    this.email = data.email;
-    this.pwd = data.pwd;
-    this.token = data.token;
+    for(var keys = Object.keys(data), l = keys.length; l; --l)
+    {
+        this[ keys[l-1] ] = data[ keys[l-1] ];
+    }
 }
 
 Login.prototype.processSignup = function (callback) {
@@ -23,9 +22,9 @@ Login.prototype.processSignup = function (callback) {
             }
         } else {
             //create user
-            var u = new User({created_at: new Date(), full_name: login.data.full_name, first_name: login.data.first_name, last_name: login.data.last_name, birth_day: login.data.birth_day});
+            var u = new User({created_at: new Date(), full_name: login.full_name, first_name: login.first_name, last_name: login.last_name, birth_day: login.birth_day});
             u.save(function (result) {
-                login.data.user_id = result._id.toString();
+                login.user_id = result._id.toString();
                 login.save(function (result) {
                         callback(result);
                     }
@@ -41,8 +40,8 @@ Login.prototype.processSignin = function (callback) {
     this.find(function (result) {
         if (result) {
             if (
-                (result.email == login.data.email && (result.pwd != login.data.pwd || !result.pwd))
-                && (result.token != login.data.token)
+                (result.email == login.email && (result.pwd != login.pwd || !result.pwd))
+                && (result.token != login.token)
                 ) {
                 callback({error: "wrong email or password", code: "wrong-email-password"});
             } else {
@@ -66,11 +65,11 @@ Login.prototype.genToken = function () {
 }
 
 Login.prototype.save = function (callback) {
-    if (!this.data._id) {
-        this.data.token = this.genToken();
-        this.data.created_at = new Date();
-        this.data.updated_at = new Date();
-        logins.insert(this.data
+    if (!this._id) {
+        this.token = this.genToken();
+        this.created_at = new Date();
+        this.updated_at = new Date();
+        logins.insert(this
             , function (err, result) {
                 if (err) {
                     callback(err);
@@ -80,10 +79,10 @@ Login.prototype.save = function (callback) {
                 }
             });
     } else {
-        var id = this.data._id;
-        delete this.data._id;
-        this.data.updated_at = new Date();
-        logins.update({_id: mongo.helper.toObjectID(id)}, {'$set': this.data}
+        var id = this._id;
+        delete this._id;
+        this.updated_at = new Date();
+        logins.update({_id: mongo.helper.toObjectID(id)}, {'$set': this}
             , function (err, result) {
                 if (err) {
                     callback(err);
@@ -95,14 +94,16 @@ Login.prototype.save = function (callback) {
     }
 }
 
-Login.prototype.find = function () {
+Login.prototype.find = function (callback) {
     var f = {};
-    if (this.data.email) {
-        f.email = this.data.email;
+    if (this.email) {
+        f.email = this.email;
     } else {
-        f = this.data;
+        f = this;
     }
-    return logins.findOne(f);
+    logins.findOne(f, function (err, result) {
+        callback(result)
+    });
 }
 
 Login.prototype.findUser = function (callback) {

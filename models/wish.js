@@ -2,6 +2,7 @@ var mongo = require('mongoskin');
 var db = mongo.db("mongodb://localhost:27017/giftto", {native_parser: true});
 var wishes = db.collection('wishes');
 var User = require('./user');
+
 function Wish(data) {
     this.data = data;
 }

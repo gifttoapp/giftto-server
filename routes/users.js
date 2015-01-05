@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
 var Login = require('../models/login');
-var Promise = require('promise');
 
 router.post('/:id/get', function (req, res) {
     try {
