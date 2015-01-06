@@ -5,7 +5,7 @@ var bodyParser = require('body-parser')
 
 router.use(bodyParser.json());
 
-router.post('/do', function (req, res) {
+router.post('/signin', function (req, res) {
     try {
         var login = req.body.login;
         if (login) {
@@ -22,6 +22,27 @@ router.post('/do', function (req, res) {
         }
     } catch (e) {
         res.send(e,500);
+    }
+});
+
+router.post('/signup', function (req, res) {
+    try {
+        var login = req.body.login;
+        if (login) {
+            var u = new Login(login);
+            u.processSignup(function(result){
+                if(result.error){
+                    res.send(result,500);
+                } else {
+                    res.send(result);
+                }
+            });
+        } else {
+            res.send({error:"no data sent in request body",code:"empty-request-body"},500);
+        }
+    } catch (e) {
+        res.send(e,500);
+        console.log(e);
     }
 });
 

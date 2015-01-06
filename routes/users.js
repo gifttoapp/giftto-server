@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var Login = require('../models/login');
 
-router.post('/:id/get', function (req, res) {
+router.get('/:id', function (req, res) {
     try {
         if (req.header("x-gt-auth")) {
             var login = new Login({token: req.header("x-gt-auth")});

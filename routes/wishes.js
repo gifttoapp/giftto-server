@@ -3,7 +3,7 @@ var router = express.Router();
 var Wish = require('../models/wish');
 var Login = require('../models/login');
 
-router.post('/save', function (req, res) {
+router.post('', function (req, res) {
     try {
         if (req.header("x-gt-auth")) {
             var login = new Login({token: req.header("x-gt-auth")});
@@ -30,7 +30,7 @@ router.post('/save', function (req, res) {
     }
 });
 
-router.post('/user/:uid/get', function (req, res) {
+router.get('/user/:uid', function (req, res) {
     try {
         if (req.header("x-gt-auth")) {
             var login = new Login({token: req.header("x-gt-auth")});

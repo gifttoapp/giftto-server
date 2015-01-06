@@ -1,17 +1,17 @@
 var express = require('express');
+var connectDomain = require("connect-domain");
 var path = require('path');
 var favicon = require('static-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 
-var routes = require('./routes/index');
-var users = require('./routes/users');
-var signup = require('./routes/signup');
-var signin = require('./routes/signin');
-var wishes = require('./routes/wishes');
+var routes = require('./routes/routes');
+var api = require('./routes/api');
 var bodyParser = require('body-parser')
 
 var app = express();
+
+app.use(connectDomain());
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -30,11 +30,8 @@ app.use(bodyParser.urlencoded());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', routes);
-app.use('/users', users);
-app.use('/wishes', wishes);
-app.use('/signup', signup);
-app.use('/signin', signin);
+app.use('', routes);
+app.use('/api', api);
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
